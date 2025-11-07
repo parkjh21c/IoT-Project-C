@@ -84,6 +84,7 @@
   color: #fff !important;
 }
 
+
 .publication-links .button .icon i,
 .publication-links .button .icon img {
   filter: drop-shadow(0 0 1px rgba(0,0,0,0.7));
@@ -172,7 +173,6 @@
         </div>
       </div>
     </div>
-    </div>
   </section>
 
   <section class="section hero is-small">
@@ -188,49 +188,57 @@
                 
               </div>
               <div style="border: none; border-radius: 15px; box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4); overflow: hidden; background: linear-gradient(45deg, #0575e6, #7928ca81); padding: 10px;">
-                <!-- 기존 영상 부분 대체 -->
-                 <iframe 
-                    src="static/pdf/IoT_Project_Midterm_Presentation.pdf" 
-                    width="900PX"
-                    height="800PX"
-                    id="tree" 
-                    style="border: none; border-radius: 12px; box-shadow: 0 12px 24px rgba(0,0,0,0.1);">
-                  </iframe>
-                  
-                  
-
+                <div id="pdf-carousel" class="carousel">
+        
+                  <div class="carousel-item">
+                      <img src="static/images/IoT_Project_Midterm_Presentation.pdf/1.png" alt="Presentation Page 1" style="display: block; width: 100%; border-radius: 12px;">
+                  </div>
+                  <div class="carousel-item">
+                      <img src="static/images/IoT_Project_Midterm_Presentation.pdf/2.png" alt="Presentation Page 2" style="display: block; width: 100%; border-radius: 12px;">
+                  </div>
+                  <div class="carousel-item">
+                      <img src="static/images/IoT_Project_Midterm_Presentation.pdf/3.png" alt="Presentation Page 3" style="display: block; width: 100%; border-radius: 12px;">
+                  </div>
+                  <div class="carousel-item">
+                      <img src="static/images/IoT_Project_Midterm_Presentation.pdf/4.png" alt="Presentation Page 4" style="display: block; width: 100%; border-radius: 12px;">
+                  </div>
+                  <div class="carousel-item">
+                      <img src="static/images/IoT_Project_Midterm_Presentation.pdf/5.png" alt="Presentation Page 5" style="display: block; width: 100%; border-radius: 12px;">
+                  </div>
+                </div>
+              </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 
 
 <!-- Paper abstract -->
-<section class="section hero is-small">
-  <div class="container is-max-desktop">
-    <div class="columns is-centered">
-      <div class="column is-full">
-        <div class="content">
-         <h2 class="title is-3" style="background: linear-gradient(45deg, #f200b571, #eb419f8e, #0077ff5b, #2881cad7); color: white; padding: 10px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); text-align: center;">
-           Overview
-         </h2>
-        <div class="content has-text-justified">
-            Overview of <b>Weather Tracker IoT</b><br>
-            : A location-based climate monitoring system using Wokwi and the KMA API.<br>
-            <span style="color: #ff69b4;">(Check Location):</span> Uses GPS to determine current location for weather data.<br>
-            <span style="color: #007bff;">(Show Weather):</span> Displays real-time weather information based on the detected location.
-          </p>
-          <img src="static/images/Plan3.png" alt="Teaser GIF" height="100%">
-          <p class="subtitle has-text-centered">
+  <section class="section hero is-small">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-full">
+          <div class="content">
+          <h2 class="title is-3" style="background: linear-gradient(45deg, #f200b571, #eb419f8e, #0077ff5b, #2881cad7); color: white; padding: 10px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); text-align: center;">
+            Overview
+          </h2>
+          <div class="content has-text-justified">
+              <p>
+                  Overview of <b>Weather Tracker IoT</b><br>
+                  : A location-based climate monitoring system using Wokwi and the KMA API.<br>
+                  <span style="color: #ff69b4;">(Check Location):</span> Uses GPS to determine current location for weather data.<br>
+                  <span style="color: #007bff;">(Show Weather):</span> Displays real-time weather information based on the detected location.
+              </p>
+            <img src="static/images/Plan3.png" alt="Teaser GIF" height="100%">
+            
+            </div>
         </div>
       </div>
+      </div>
     </div>
-    </div>
-  </div>
-</section>
+  </section>
 
 <!-- End paper abstract -->
 
@@ -302,6 +310,18 @@
 <!-- You can add a tracker to track page visits by creating an account at statcounter.com -->
 
     <!-- End of Statcounter Code -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    
+    // 1. 위에서 만든 Carousel의 id ("#pdf-carousel")를 찾아 초기화합니다.
+    bulmaCarousel.attach('#pdf-carousel', {
+        slidesToScroll: 1, // 한 번에 1장씩 넘기기
+        slidesToShow: 1,   // 한 번에 1장만 보여주기
+        navigation: true,  // true로 설정하면 좌/우 화살표 버튼이 생깁니다.
+        pagination: true   // true로 설정하면 하단에 점(dot) 네비게이션이 생깁니다.
+    });
 
-  </body>
-  </html>
+  });
+</script>
+</body>
+ </html>
