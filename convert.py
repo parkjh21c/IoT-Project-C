@@ -1,13 +1,12 @@
 import csv
 import os
 
-# 입력 CSV 파일 이름 (사용자가 첨부한 파일)
+# input CSV file name (user)
 CSV_FILENAME = 'forecast_points.CSV'
-# 출력 헤더 파일 이름 (ESP32가 사용할 파일)
+# output header file name (for ESP32)
 HEADER_FILENAME = 'locations.h'
 
 # C++ 구조체 정의 (격자 X, Y 좌표만 포함)
-# int16_t는 -32,768 ~ 32,767 범위의 정수로, 격자 좌표에 충분하며 메모리를 절약합니다.
 struct_definition = """
 struct Location {
   int16_t gridX; // 격자 X
