@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Weather Dashboard (KMA + Local Proxy)</title>
+  <meta name="description" content="기상청 초단기실황 최근 12시간 기온 차트 + 상세 정보" />
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --bg:#020617;
+      --card:#020617;
+      --muted:#94a3b8;
+      --accent:#38bdf8;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:radial-gradient(circle at top,#0f172a,#020617 45%);
+      color:#e5e7eb;
+      min-height:100vh;
+    }
+    .container{
+      max-width:1200px;
+      margin:24px auto 40px;
+      padding:0 20px;
+    }
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      margin-bottom:20px;
+    }
+    .title{
+      font-size:24px;
+      font-weight:700;
+    }
+    .controls{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    input{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,0.4);
+      background:rgba(15,23,42,0.9);
+      color:#e5e7eb;
+      font-size:13px;
+      min-width:110px;
+      outline:none;
+    }
+    input::placeholder{color:#64748b}
+    button{
+      padding:9px 16px;
+      border-radius:999px;
+      border:0;
+      background:var(--accent);
+      color:#020617;
+      font-weight:600;
+      font-size:13px;
+      cursor:pointer;
+      box-shadow:0 10px 25px rgba(56,189,248,0.25);
+    }
+    button:hover{background:#0ea5e9}
+    main{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+    .card{
+      background:linear-gradient(135deg,rgba(15,23,42,0.95),rgba(15,23,42,0.96));
+      border-radius:18px;
+      padding:20px 22px;
+      box-shadow:0 18px 40px rgba(15,23,42,0.85);
+      border:1px solid rgba(148,163,184,0.2);
+    }
+    .card-header{
+      display:flex;
+      justify-content:space-between;
+      gap:24px;
+      align-items:flex-start;
+    }
+    .loc{
+      font-size:15px;
+      font-weight:600;
+      margin-bottom:2px;
+    }
+    .desc{
+      font-size:13px;
+      color:var(--muted);
+    }
+    .current-temp{
+      text-align:right;
+    }
+    .current-temp .value{
+      font-size:36px;
+      font-weight:700;
+    }
+    .feels{
+      font-size:13px;
+      color:var(--muted);
+    }
+    .meta{
+      display:flex;
+      gap:16px;
+      margin-top:10px;
+      font-size:13px;
+      color:var(--muted);
+      flex-wrap:wrap;
+    }
+    h3{
+      margin:0 0 10px;
+      font-size:16px;
+    }
+    .chart-wrap{
+      margin-top:8px;
+      border-radius:14px;
+      background:radial-gradient(circle at top,rgba(15,23,42,0.9),rgba(15,23,42,0.95));
+      padding:12px 12px 16px;
+      border:1px solid rgba(30,64,175,0.5);
+    }
+    canvas{max-width:100%;height:280px !important}
+    #status{
+      margin-top:6px;
+      font-size:12px;
+      color:#e5e7eb;
+    }
+    .details-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:10px 18px;
+      font-size:14px;
+      margin-top:6px;
+    }
+    .detail-item{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding:8px 10px;
+      border-radius:999px;
+      background:rgba(15,23,42,0.9);
+      border:1px solid rgba(51,65,85,0.8);
+    }
+    .detail-label{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      color:#cbd5f5;
+    }
+    .detail-value{
+      font-weight:500;
+      color:#e5e7eb;
+    }
+    @media(max-width:768px){
+      header{flex-direction:column;align-items:flex-start}
+      .card-header{flex-direction:column-reverse;align-items:flex-start}
+      .current-temp{text-align:left}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div class="title">Weather Dashboard</div>
+      <div class="controls">
+        <input id="nxInput" type="number" placeholder="X (예: 60)">
+        <input id="nyInput" type="number" placeholder="Y (예: 127)">
+        <button id="coordBtn">조회</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- 현재 카드 -->
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <div id="location" class="loc">(nx, ny)</div>
+            <div id="weatherDesc" class="desc">현재 실황</div>
+          </div>
+          <div class="current-temp">
+            <div id="temp" class="value">--°C</div>
+            <div id="feelsLike" class="feels">feels like --°C</div>
+          </div>
+        </div>
+        <div class="meta">
+          <div>humidity: <span id="humidity">--%</span></div>
+          <div>wind: <span id="wind">-- m/s</span></div>
+          <div>time: <span id="time">--</span></div>
+        </div>
+      </section>
+
+      <!-- 차트 카드 -->
+      <section class="card">
+        <h3>Temperature Chart (최근 12시간, 1시간 간격)</h3>
+        <div class="chart-wrap">
+          <canvas id="tempChart"></canvas>
+        </div>
+        <div id="status">좌표를 입력하고 "조회"를 누르면 데이터를 불러옵니다.</div>
+      </section>
+
+      <!-- 상세 정보 카드 -->
+      <section class="card">
+        <h3>Weather Details (마지막 시각 기준)</h3>
+        <div class="details-grid">
+          <div class="detail-item">
+            <div class="detail-label">🌡 Temp</div>
+            <div id="d-temp" class="detail-value">--</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">💧 Humidity</div>
+            <div id="d-humid" class="detail-value">--</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">🌧 Rain 1h</div>
+            <div id="d-rain" class="detail-value">--</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">💨 Wind</div>
+            <div id="d-wind" class="detail-value">--</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">🧭 Wind Dir</div>
+            <div id="d-vec" class="detail-value">--</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">🌈 PTY</div>
+            <div id="d-pty" class="detail-value">--</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">➡️ UUU</div>
+            <div id="d-uuu" class="detail-value">--</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">⬆️ VVV</div>
+            <div id="d-vvv" class="detail-value">--</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+<script>
+// 더 이상 HTML에서 authKey / 프록시를 쓰지 않고
+// 로컬 플라스크 프록시 서버(127.0.0.1:5000)만 사용
+
+const $ = id => document.getElementById(id);
+let chart = null;
+
+function setStatus(msg){
+  $("status").textContent = msg;
+}
+
+function renderCurrent({nx,ny,temp,humidity,wind}){
+  $("location").textContent = `(${nx},${ny})`;
+  $("temp").textContent = `${temp.toFixed(1)}°C`;
+  $("feelsLike").textContent = `feels like ${temp.toFixed(1)}°C`;
+  $("humidity").textContent = humidity != null ? `${humidity}%` : "--%";
+  $("wind").textContent = wind != null ? `${wind} m/s` : "-- m/s";
+  $("time").textContent = new Date().toLocaleString();
+}
+
+function renderDetails(info){
+  $("d-temp").textContent  = info.temp     != null ? `${info.temp.toFixed(1)}°C` : "--";
+  $("d-humid").textContent = info.humidity != null ? `${info.humidity}%`        : "--";
+  $("d-rain").textContent  = info.rn1      != null ? `${info.rn1} mm`           : "--";
+  $("d-wind").textContent  = info.wsd      != null
+    ? (info.vec != null ? `${info.wsd} m/s (${info.vec}°)` : `${info.wsd} m/s`)
+    : "--";
+  $("d-vec").textContent   = info.vec      != null ? `${info.vec}°`             : "--";
+  $("d-pty").textContent   = info.pty      != null ? `${info.pty}`              : "--";
+  $("d-uuu").textContent   = info.uuu      != null ? `${info.uuu}`              : "--";
+  $("d-vvv").textContent   = info.vvv      != null ? `${info.vvv}`              : "--";
+}
+
+function drawChart(points){
+  const ctx = $("tempChart").getContext("2d");
+  if(chart) chart.destroy();
+  chart = new Chart(ctx,{
+    type:"line",
+    data:{
+      labels: points.map(p => p.label),
+      datasets:[{
+        label:"기온(°C)",
+        data: points.map(p => p.temp),
+        borderColor:"#38bdf8",
+        backgroundColor:"rgba(56,189,248,0.15)",
+        tension:0.25,
+        pointRadius:3,
+        pointHoverRadius:5,
+        spanGaps:true
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:"#e5e7eb"}}
+      },
+      scales:{
+        x:{
+          ticks:{color:"#9ca3af"},
+          grid:{color:"rgba(55,65,81,0.4)"}
+        },
+        y:{
+          ticks:{color:"#9ca3af"},
+          grid:{color:"rgba(55,65,81,0.4)"},
+          title:{display:true,text:"°C",color:"#9ca3af"}
+        }
+      }
+    }
+  });
+}
+
+// ✅ 여기서부터가 핵심: 로컬 플라스크 프록시로만 호출
+async function fetchOne(nx,ny,date,time){
+  const url =
+    `https://kma-proxy.onrender.com/kma-ultra` +
+  `?base_date=${date}&base_time=${time}&nx=${nx}&ny=${ny}`;
+
+  const res = await fetch(url);
+  if(!res.ok) throw new Error("HTTP " + res.status);
+  const json = await res.json();
+
+  const items = json.response?.body?.items?.item || [];
+  const get = cat => items.find(v => v.category === cat)?.obsrValue ?? null;
+
+  return {
+    temp:    get("T1H") !== null ? Number(get("T1H")) : null,
+    humidity:get("REH") !== null ? Number(get("REH")) : null,
+    wsd:     get("WSD") !== null ? Number(get("WSD")) : null,
+    rn1:     get("RN1") !== null ? Number(get("RN1")) : null,
+    pty:     get("PTY") !== null ? Number(get("PTY")) : null,
+    vec:     get("VEC") !== null ? Number(get("VEC")) : null,
+    uuu:     get("UUU") !== null ? Number(get("UUU")) : null,
+    vvv:     get("VVV") !== null ? Number(get("VVV")) : null
+  };
+}
+
+async function load(nx,ny){
+  const now = new Date();
+
+  // 기준: 항상 존재하는 "현재시각 - 1시간" 정각
+  const end = new Date(now);
+  end.setMinutes(0,0,0);
+  end.setHours(end.getHours() - 1);
+
+  // 12시간 전
+  const start = new Date(end.getTime() - 12 * 60 * 60 * 1000);
+
+  setStatus("최근 12시간 데이터를 불러오는 중... (조금만 기다려 주세요)");
+
+  const points = [];
+  let lastSample = null;
+
+  let index = 0;
+  const total = 12 + 1; // 시작 포함 13개 지점
+
+  for(let t = new Date(start); t <= end; t.setHours(t.getHours() + 1)){
+    const yyyy = t.getFullYear();
+    const mm = String(t.getMonth() + 1).padStart(2,"0");
+    const dd = String(t.getDate()).padStart(2,"0");
+    const hh = String(t.getHours()).padStart(2,"0");
+
+    const date = `${yyyy}${mm}${dd}`;
+    const time = `${hh}00`;
+    const label = `${mm}/${dd} ${hh}시`;
+
+    setStatus(`(${index+1}/${total}) ${label} 데이터 불러오는 중...`);
+
+    try{
+      const r = await fetchOne(nx,ny,date,time);
+      const tempVal = r && r.temp != null ? r.temp : null;
+      points.push({ label, temp: tempVal });
+      if(r && r.temp != null){
+        lastSample = r;
+      }
+    }catch(e){
+      console.error("fetch 실패:", label, e);
+      points.push({ label, temp: null });
+    }
+
+    index++;
+  }
+
+  if(!lastSample){
+    setStatus("데이터가 없습니다. (좌표/시간 또는 제공 시간대 확인)");
+    return;
+  }
+
+  renderCurrent({
+    nx,
+    ny,
+    temp:lastSample.temp,
+    humidity:lastSample.humidity,
+    wind:lastSample.wsd
+  });
+  renderDetails(lastSample);
+  drawChart(points);
+  setStatus(`불러오기 완료! (최근 12시간, 총 ${points.length}개 시각)`);
+}
+
+document.getElementById("coordBtn").addEventListener("click", () => {
+  const nx = parseInt($("nxInput").value,10);
+  const ny = parseInt($("nyInput").value,10);
+  if(Number.isNaN(nx) || Number.isNaN(ny)){
+    alert("X,Y 좌표를 숫자로 입력하세요.");
+    return;
+  }
+  load(nx,ny);
+});
+</script>
+</body>
+</html>
