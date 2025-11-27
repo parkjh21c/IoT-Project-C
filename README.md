@@ -2,7 +2,7 @@
 
 #### The system receives weather data from KMA(Korea Meteorological Administration) through its API Hub, simulates a custom GPS location,and generates virtual sensors such as temperature, humidity, and light.
 #### All collected information will be on the serial monitor in VSCode.
-----
+-----
 
 ## Key Features
 #### - Fetch and parse weather data in XML format from the KMA API
