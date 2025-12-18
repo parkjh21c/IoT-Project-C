@@ -308,7 +308,7 @@
             </h2>
             <div class="content has-text-justified">
               <p>
-                By converting regional data from Excel into a local <code>location.h</code> file, the system supports both coordinate-to-location and location-to-coordinate conversion for KMA weather API requests.
+                By converting regional data from Excel into a <code>location.h</code> file, the system supports both coordinate-to-location and location-to-coordinate conversion for KMA weather API requests.
               </p>
             </div>
             <div class="columns is-mobile is-centered mt-4">
@@ -342,9 +342,7 @@
                 <strong>KMA (Korea Meteorological Administration) API</strong>.
                 However, this API does not accept standard GPS coordinates
                 (latitude and longitude) directly.
-                Instead, it requires location data in the form of
-                <strong>KMA grid coordinates (NX, NY)</strong>, which are used by
-                the national weather forecasting system.
+                The KMA API uses a unique system called <b>KMA grid coordinates (NX, NY)</b> for its weather data, instead of standard GPS coordinates.
               </p>
 
               <ul>
