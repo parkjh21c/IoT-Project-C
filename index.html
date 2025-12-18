@@ -265,14 +265,14 @@
             <ul>
               <li>
                 <strong>Initial Attempt:</strong>
-                We first tried to estimate the location using an IP-based Wi-Fi approach.
+                I first tried to estimate the location using an IP-based Wi-Fi approach.
                 However, this method only returned the location of the internet base station,
                 which was not accurate enough for precise weather data retrieval.
               </li>
 
               <li>
                 <strong>Local Location Acquisition:</strong>
-                Since most laptops do not have a physical GPS sensor, we utilized the
+                Since most laptops do not have a physical GPS sensor, I utilized the
                 <strong>Windows Geolocation API</strong>, which estimates the device’s position
                 using Wi-Fi and network-based information.
               </li>
@@ -280,7 +280,7 @@
               <li>
                 <strong>Server-Based Bridge:</strong>
                 Because Wokwi runs in a sandbox environment, direct access to the host system is restricted.
-                To overcome this, we implemented a local server using <code>server.py</code>.
+                To overcome this, I implemented a local server using <code>server.py</code>.
                 This server retrieves the estimated latitude and longitude from the host machine
                 and transmits them to the Wokwi simulation, effectively bypassing the sandbox limitation.
               </li>
@@ -358,7 +358,7 @@
                 <li>
                   <strong>Coordinate Conversion:</strong>
                   To request accurate weather data,
-                  we converted standard latitude and longitude values
+                  I converted standard latitude and longitude values
                   into the corresponding KMA grid coordinates
                   using a dedicated transformation algorithm.
                 </li>
